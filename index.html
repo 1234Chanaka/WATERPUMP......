@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>SMART SPACE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --blue-dark:#0b1c2d;
+      --blue-main:#0d47a1;
+      --blue-light:#1976d2;
+      --gold:#fbc02d;
+      --white:#ffffff;
+    }
+
+    body{
+      font-family: Arial, sans-serif;
+      text-align:center;
+      margin:0;
+      padding:0 10px 40px;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+
+      background-image:url("https://static.vecteezy.com/system/resources/previews/001/882/531/original/dark-blue-technology-background-free-vector.jpg");
+      background-size:cover;
+      background-position:center;
+      background-attachment:fixed;
+      color:var(--gold);
+    }
+
+    h1{
+      margin-top:30px;
+      font-size:1.9rem;
+      color:var(--gold);
+    }
+
+    /* LOGIN */
+    #loginForm{
+      max-width:400px;
+      margin:80px auto 20px;
+      background:rgba(11,28,45,0.95);
+      padding:30px 20px;
+      border-radius:15px;
+      border:1px solid var(--gold);
+      box-shadow:0 6px 20px rgba(0,0,0,0.5);
+    }
+
+    #loginForm input{
+      width:100%;
+      padding:12px;
+      margin:10px 0 20px;
+      font-size:1rem;
+      border-radius:10px;
+      border:1px solid var(--gold);
+      background:#0f2a44;
+      color:white;
+    }
+
+    #loginForm button{
+      width:100%;
+      padding:12px;
+      font-size:18px;
+      font-weight:bold;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--gold),#c49000);
+      color:var(--blue-dark);
+    }
+
+    /* DASHBOARD */
+    #dashboard{ display:none; }
+
+    .relay-container{
+      display:flex;
+      justify-content:center;
+      margin-top:40px;
+    }
+
+    .relay-card{
+      width:260px;
+      padding:25px;
+      border-radius:18px;
+      background:rgba(11,28,45,0.95);
+      border:1px solid var(--gold);
+      box-shadow:0 6px 20px rgba(0,0,0,0.5);
+      color:white;
+    }
+
+    .relay-card h2{
+      color:var(--gold);
+      margin-bottom:10px;
+    }
+
+    .relay-card p{
+      margin-bottom:15px;
+      font-size:1.1rem;
+    }
+
+    .relay-card button{
+      width:100%;
+      padding:12px;
+      font-size:16px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:bold;
+      color:var(--gold);
+      background:linear-gradient(135deg,var(--blue-light),var(--blue-main));
+    }
+
+    .relay-card button:hover{ opacity:0.9; }
+
+    #logoutBtn{
+      max-width:260px;
+      margin:25px auto;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--gold),#c49000);
+      color:var(--blue-dark);
+    }
+
+    footer{
+      font-size:0.9rem;
+      color:var(--gold);
+      margin-top:40px;
+    }
+
+    /* MOBILE */
+    @media(max-width:600px){
+      .relay-card{
+        width:90%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>SMART SPACE – WATER PUMP</h1>
+
+<!-- LOGIN -->
+<div id="loginForm">
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button id="loginBtn">LOGIN</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="relay-container">
+    <div class="relay-card">
+      <h2>WATER PUMP</h2>
+      <p>Status: <span id="status1">Loading...</span></p>
+      <button id="btn1">TOGGLE</button>
+    </div>
+  </div>
+
+  <button id="logoutBtn">LOGOUT</button>
+</div>
+
+<footer>
+  Created by SMART SPACE
+</footer>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeMKIacnnUZZIAQothDYKoQNsUWjMNuC8",
+  authDomain: "water-pump-ab584.firebaseapp.com",
+  databaseURL: "https://water-pump-ab584-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "water-pump-ab584",
+  storageBucket: "water-pump-ab584.firebasestorage.app",
+  messagingSenderId: "681138312661",
+  appId: "1:681138312661:web:625227558b9d21e8ded95c"
+};
+
+  firebase.initializeApp(firebaseConfig);
+
+  const allowedEmail="abijayasinghe@gmail.com";
+  const allowedPassword="Waterpump.01";
+
+  const loginForm=document.getElementById("loginForm");
+  const dashboard=document.getElementById("dashboard");
+
+  document.getElementById("loginBtn").onclick=()=>{
+    const e=email.value.trim();
+    const p=password.value;
+    if(e===allowedEmail && p===allowedPassword){
+      firebase.auth().signInWithEmailAndPassword(e,p).then(()=>{
+        loginForm.style.display="none";
+        dashboard.style.display="block";
+        startControl();
+      }).catch(err=>alert(err.message));
+    }else{
+      alert("Invalid credentials");
+    }
+  };
+
+  function startControl(){
+    const ref=firebase.database().ref("/WATERPUMP");
+    const status=document.getElementById("status1");
+    const btn=document.getElementById("btn1");
+
+    ref.on("value",s=>{
+      const on=s.val();
+      status.innerText=on?"ON":"OFF";
+      btn.innerText=on?"ON":"OFF";
+    });
+
+    btn.onclick=()=>ref.get().then(s=>ref.set(!s.val()));
+  }
+
+  document.getElementById("logoutBtn").onclick=()=>{
+    firebase.auth().signOut();
+    dashboard.style.display="none";
+    loginForm.style.display="block";
+  };
+</script>
+
+</body>
+</html>
